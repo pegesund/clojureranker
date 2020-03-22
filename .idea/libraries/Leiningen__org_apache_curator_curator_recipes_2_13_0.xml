@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.apache.curator/curator-recipes:2.13.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/curator/curator-recipes/2.13.0/curator-recipes-2.13.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

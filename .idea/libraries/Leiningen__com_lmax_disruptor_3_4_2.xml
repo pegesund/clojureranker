@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: com.lmax/disruptor:3.4.2">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/lmax/disruptor/3.4.2/disruptor-3.4.2.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

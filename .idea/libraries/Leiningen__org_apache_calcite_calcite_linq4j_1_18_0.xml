@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.apache.calcite/calcite-linq4j:1.18.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/calcite/calcite-linq4j/1.18.0/calcite-linq4j-1.18.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

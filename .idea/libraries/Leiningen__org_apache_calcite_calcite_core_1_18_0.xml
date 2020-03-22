@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Leiningen: org.apache.calcite/calcite-core:1.18.0">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/apache/calcite/calcite-core/1.18.0/calcite-core-1.18.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
