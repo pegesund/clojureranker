@@ -19,15 +19,15 @@ public class Rescorer extends SearchComponent {
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         IFn require = Clojure.var("clojure.core", "require");
         require.invoke(Clojure.read("clojureranker.solr"));
-        // IFn startServer = Clojure.var("clojureranker.sol", "start-nrepl");
-        // startServer.invoke();
+        IFn hupp = Clojure.var("clojureranker.solr", "startnrepl");
+        hupp.invoke();
     }
 
     @Override
     public void prepare(ResponseBuilder responseBuilder) throws IOException {
         System.out.println("In prepare");
-        IFn require = Clojure.var("clojureranker.solr", "hupp");
-        require.invoke();
+        IFn hupp = Clojure.var("clojureranker.solr", "hupp");
+        hupp.invoke();
     }
 
     @Override

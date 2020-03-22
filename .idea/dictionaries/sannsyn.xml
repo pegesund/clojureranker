@@ -4,6 +4,7 @@
       <w>clojureranker</w>
       <w>hupp</w>
       <w>rescorer</w>
+      <w>startnrepl</w>
       <w>uberjar</w>
     </words>
   </dictionary>
