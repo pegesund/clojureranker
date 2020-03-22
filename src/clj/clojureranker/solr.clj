@@ -1,5 +1,5 @@
 (ns clojureranker.solr
-  (:require [[org.clojure/tools.nrepl "0.2.13"] as nrepl])
+  (:require [clojure.tools.nrepl.server :as repl])
   )
 
 

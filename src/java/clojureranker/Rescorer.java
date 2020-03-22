@@ -19,8 +19,8 @@ public class Rescorer extends SearchComponent {
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         IFn require = Clojure.var("clojure.core", "require");
         require.invoke(Clojure.read("clojureranker.solr"));
-        IFn startServer = Clojure.var("clojureranker.sol", "start-nrepl");
-        require.invoke();
+        // IFn startServer = Clojure.var("clojureranker.sol", "start-nrepl");
+        // startServer.invoke();
     }
 
     @Override
