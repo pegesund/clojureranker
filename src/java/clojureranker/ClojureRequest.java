@@ -5,6 +5,7 @@ import org.apache.solr.core.SolrCore;
 import org.apache.solr.handler.RequestHandlerBase;
 import org.apache.solr.request.SolrQueryRequest;
 import org.apache.solr.response.SolrQueryResponse;
+import org.apache.solr.search.DocListAndSet;
 
 public class ClojureRequest extends RequestHandlerBase {
 
@@ -12,6 +13,8 @@ public class ClojureRequest extends RequestHandlerBase {
     public void init(NamedList args) {
         super.init(args);
         System.out.println("--- Initializing");
+
+
     }
 
 
