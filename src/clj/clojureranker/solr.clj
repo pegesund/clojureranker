@@ -19,17 +19,19 @@
 (defn hupp []
   (println "---- HUPP 34"))
 
+(def rerank-num (atom 1000))
 
 (defn prepare [rb]
-  (let [params (.getParams (.req rb))
+  (when (rescore? rb)
+    (let [params (.getParams (.req rb))
         sortSpec (.getSortSpec rb)
         offset (.getOffset sortSpec)
-        reRankNum 10]
-    (when (> reRankNum offset)
-      (.setCount sortSpec reRankNum)
+        ]
+    (when (> @rerank-num offset)
+      (.setCount sortSpec @rerank-num)
       (.setOffset sortSpec 0)
-      (when (nil? (.get params "score"))
-        (.setFieldFlags rb SolrIndexSearcher/GET_SCORES)))))
+      (when (nil? (.get params "rescore"))
+        (.setFieldFlags rb SolrIndexSearcher/GET_SCORES))))))
 
 
 (defn rescore [score_list]
@@ -45,12 +47,14 @@
          ) score_list)
   )
 
+(defn rescore? [rb]
+  (= "true" (.get (.getParams (.req rb)) "rescore")))
 
 (defn return-new-result
-  "Pass scored results as a list of [[lucene-id score] [lucene-id score]... ]"
+  "Pass scored must be a list of [[lucene-id score] [lucene-id score]... ]"
   [rb scored-results]
 
-  (let [unzipped-score (apply map vector scored-results)
+    (let [unzipped-score (apply map vector scored-results)
         scores (into-array Float/TYPE (first unzipped-score))
         lucene-docs (into-array Integer/TYPE (second unzipped-score))
         doc-list (.docList (.getResults rb))
@@ -67,30 +71,21 @@
           response (.rsp rb)
           ]
       (-> response (.getValues) (.removeAll "response") )
-      (.addResponse response result-context)
-      )
-    )
-  )
+      (.addResponse response result-context))))
 
 (defn process [rb]
-  (println "Clojure process")
-  (let [
+
+  (when (rescore? rb) (let [
         params (.getParams (.req rb))
-        user-id (.get params "userid")
-        reRankNum (.size (.docList (.getResults rb)))
         offset (or (Integer. (.get params "start")) 0)
         searcher (.getSearcher (.req rb))
         ]
-    (when (>= reRankNum offset)
+    (when (>= @rerank-num offset)
       (let [initialSearchResult (.docList (.getResults rb))
-            score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) reRankNum))
+            score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) @rerank-num))
             lucene-docs (iterator-seq (.iterator initialSearchResult))
             solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
             composed-list (map vector score lucene-docs solr-docs)
             rescored-list (sort #(compare (first %2) (first %1)) (rescore composed-list))
             ]
-        (return-new-result rb rescored-list)
-        )
-      )
-    )
-  )
+        (return-new-result rb rescored-list))))))
