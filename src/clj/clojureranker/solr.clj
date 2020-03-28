@@ -32,6 +32,19 @@
         (.setFieldFlags rb SolrIndexSearcher/GET_SCORES)))))
 
 
+(defn rescore [score_list]
+  (map (fn [doc]
+         (let [old-score (first doc)
+               lucene-id (second doc)
+               solr-doc (nth doc 2)
+               new-score (if (= (.get solr-doc "id") "055357342X")
+                           1
+                           (rand))
+               ]
+           [new-score lucene-id])
+         ) score_list)
+  )
+
 
 (defn return-new-result
   "Pass scored results as a list of [[lucene-id score] [lucene-id score]... ]"
@@ -53,10 +66,9 @@
     (let [result-context (BasicResultContext. rb)
           response (.rsp rb)
           ]
-      (-> response (.getValues) (.removeAll "response"))
+      (-> response (.getValues) (.removeAll "response") )
       (.addResponse response result-context)
       )
-    (println "Docslice: " doc-slice)
     )
   )
 
@@ -74,14 +86,10 @@
             score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) reRankNum))
             lucene-docs (iterator-seq (.iterator initialSearchResult))
             solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
-            solr-ids (map #(.get % "id") solr-docs)
-            doc-list (.docList (.getResults rb))
+            composed-list (map vector score lucene-docs solr-docs)
+            rescored-list (sort #(compare (first %2) (first %1)) (rescore composed-list))
             ]
-        (println score lucene-docs)
-        (println "initalresults" (.docList (.getResults rb)))
-        (println searcher)
-        (println solr-ids)
-        (return-new-result rb (map vector score (shuffle lucene-docs) ))
+        (return-new-result rb rescored-list)
         )
       )
     )

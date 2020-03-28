@@ -3,6 +3,8 @@
     <words>
       <w>clojureranker</w>
       <w>hupp</w>
+      <w>rescore</w>
+      <w>rescored</w>
       <w>rescorer</w>
       <w>startnrepl</w>
       <w>uberjar</w>
