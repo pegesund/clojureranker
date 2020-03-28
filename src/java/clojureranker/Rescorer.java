@@ -23,18 +23,17 @@ public class Rescorer extends SearchComponent {
         Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
         IFn require = Clojure.var("clojure.core", "require");
         require.invoke(Clojure.read("clojureranker.solr"));
-        IFn hupp = Clojure.var("clojureranker.solr", "startnrepl");
-        hupp.invoke();
         prepare = Clojure.var("clojureranker.solr", "prepare");
         process = Clojure.var("clojureranker.solr", "process");
+        IFn init = Clojure.var("clojureranker.solr", "init");
+        init.invoke(args);
+
 
     }
 
     @Override
     public void prepare(ResponseBuilder responseBuilder) throws IOException {
         System.out.println("In prepare");
-        IFn hupp = Clojure.var("clojureranker.solr", "hupp");
-        hupp.invoke();
         prepare.invoke(responseBuilder);
     }
 
@@ -46,6 +45,6 @@ public class Rescorer extends SearchComponent {
 
     @Override
     public String getDescription() {
-        return "-- Petters description";
+        return "A solr rescorer plugin";
     }
 }

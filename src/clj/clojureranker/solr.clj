@@ -20,12 +20,22 @@
   (println "---- HUPP 34"))
 
 (def rerank-num (atom 1000))
+(def rescore-default (atom false))
+
+(defn rescore? [rb]
+  (or @rescore-default
+      (= "true" (.get (.getParams (.req rb)) "rescore"))))
+
+(defn init [args]
+  (startnrepl)
+  (println "in init..")
+  (println args))
 
 (defn prepare [rb]
   (when (rescore? rb)
     (let [params (.getParams (.req rb))
-        sortSpec (.getSortSpec rb)
-        offset (.getOffset sortSpec)
+          sortSpec (.getSortSpec rb)
+          offset (.getOffset sortSpec)
         ]
     (when (> @rerank-num offset)
       (.setCount sortSpec @rerank-num)
@@ -39,16 +49,13 @@
          (let [old-score (first doc)
                lucene-id (second doc)
                solr-doc (nth doc 2)
-               new-score (if (= (.get solr-doc "id") "055357342X")
-                           1
-                           (rand))
+               new-score (if (= (.get solr-doc "id") "055357342X") 1 (rand))
                ]
            [new-score lucene-id])
          ) score_list)
   )
 
-(defn rescore? [rb]
-  (= "true" (.get (.getParams (.req rb)) "rescore")))
+
 
 (defn return-new-result
   "Pass scored must be a list of [[lucene-id score] [lucene-id score]... ]"
@@ -74,7 +81,7 @@
       (.addResponse response result-context))))
 
 (defn process [rb]
-
+  "Get results, rescore and serve new results with new scoring"
   (when (rescore? rb) (let [
         params (.getParams (.req rb))
         offset (or (Integer. (.get params "start")) 0)
