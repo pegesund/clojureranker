@@ -1,8 +1,9 @@
 (ns clojureranker.solr
   (:require [clojure.tools.nrepl.server :as repl])
-  (:import (org.apache.solr.search SolrIndexSearcher)
+  (:import (org.apache.solr.search SolrIndexSearcher DocListAndSet DocSlice)
            (com.google.common.collect Streams ImmutableList)
-           (clojureranker ClojureUtils)))
+           (clojureranker ClojureUtils)
+           (org.apache.solr.response BasicResultContext)))
 
 
 (def started (atom false))
@@ -30,6 +31,35 @@
       (when (nil? (.get params "score"))
         (.setFieldFlags rb SolrIndexSearcher/GET_SCORES)))))
 
+
+
+(defn return-new-result
+  "Pass scored results as a list of [[lucene-id score] [lucene-id score]... ]"
+  [rb scored-results]
+
+  (let [unzipped-score (apply map vector scored-results)
+        scores (into-array Float/TYPE (first unzipped-score))
+        lucene-docs (into-array Integer/TYPE (second unzipped-score))
+        doc-list (.docList (.getResults rb))
+        matches (.matches doc-list)
+        max-score (.maxScore doc-list)
+        new-offset (.offset doc-list)
+        len (count lucene-docs)
+        dls (DocListAndSet.)
+        doc-slice (DocSlice. new-offset len lucene-docs scores matches max-score)
+        ]
+    (set! (.docList dls) doc-slice)
+    (.setResults rb dls)
+    (let [result-context (BasicResultContext. rb)
+          response (.rsp rb)
+          ]
+      (-> response (.getValues) (.removeAll "response"))
+      (.addResponse response result-context)
+      )
+    (println "Docslice: " doc-slice)
+    )
+  )
+
 (defn process [rb]
   (println "Clojure process")
   (let [
@@ -37,15 +67,21 @@
         user-id (.get params "userid")
         reRankNum (.size (.docList (.getResults rb)))
         offset (or (Integer. (.get params "start")) 0)
+        searcher (.getSearcher (.req rb))
         ]
     (when (>= reRankNum offset)
       (let [initialSearchResult (.docList (.getResults rb))
             score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) reRankNum))
-            docs (iterator-seq (.iterator initialSearchResult))
+            lucene-docs (iterator-seq (.iterator initialSearchResult))
+            solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
+            solr-ids (map #(.get % "id") solr-docs)
+            doc-list (.docList (.getResults rb))
             ]
-        (println score docs)
-        (println "initalresults" (.docSet (.getResults rb)))
-
+        (println score lucene-docs)
+        (println "initalresults" (.docList (.getResults rb)))
+        (println searcher)
+        (println solr-ids)
+        (return-new-result rb (map vector score (shuffle lucene-docs) ))
         )
       )
     )
