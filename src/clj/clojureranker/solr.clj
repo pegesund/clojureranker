@@ -23,9 +23,10 @@
 (defn hupp []
   (println "---- HUPP 34"))
 
-(def rerank-num (atom 1000))
+
 (def rescore-default (atom false))
 (defonce functions (atom {}))
+(defonce tops (atom {}))
 
 
 (defn rescore? [rb]
@@ -52,7 +53,9 @@
       )
     (when a-function
       (let [fun (resolve (symbol a-function))]
-        (swap! functions assoc name fun)))))
+        (swap! functions assoc name fun)))
+    (swap! tops assoc name top)
+    ))
 
 
 (defn prepare [rb name]
@@ -61,9 +64,10 @@
     (let [params (.getParams (.req rb))
           sortSpec (.getSortSpec rb)
           offset (.getOffset sortSpec)
+          top (.get @tops name)
         ]
-    (when (> @rerank-num offset)
-      (.setCount sortSpec @rerank-num)
+    (when (> top offset)
+      (.setCount sortSpec top)
       (.setOffset sortSpec 0)
       (when (= "true" (.get params "rescore"))
         (.setFieldFlags rb SolrIndexSearcher/GET_SCORES))))))
@@ -110,11 +114,13 @@
   (when (rescore? rb) (let [
         params (.getParams (.req rb))
         offset (Integer. (or (.get params "start") 0))
+        rows (if-let [r (.get params "rows")] (Long. r))
         searcher (.getSearcher (.req rb))
+        top (.get @tops name)
         ]
-    (when (>= @rerank-num offset)
+    (when (>= top offset)
       (let [initialSearchResult (.docList (.getResults rb))
-            score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) @rerank-num))
+            score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) top))
             lucene-docs (iterator-seq (.iterator initialSearchResult))
             solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
             composed-list (map vector score lucene-docs solr-docs)
@@ -122,5 +128,6 @@
             rescored-list (sort #(compare (first %2) (first %1))
                                 (apply the-rescore-function [composed-list])
                                 )
+            result (if rows (take rows rescored-list) rescored-list)
             ]
-        (return-new-result rb rescored-list))))))
+        (return-new-result rb result))))))
