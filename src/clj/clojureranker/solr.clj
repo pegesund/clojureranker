@@ -25,6 +25,7 @@
 
 (def rerank-num (atom 1000))
 (def rescore-default (atom false))
+(defonce functions (atom {}))
 
 
 (defn rescore? [rb]
@@ -48,7 +49,10 @@
     (when a-load-file (load-file a-load-file))
     (when do-start-repl
       (startnrepl)
-      )))
+      )
+    (when a-function
+      (let [fun (resolve (symbol a-function))]
+        (swap! functions assoc name fun)))))
 
 
 (defn prepare [rb name]
@@ -66,6 +70,7 @@
 
 
 (defn rescore [score_list]
+  "this is only a test rescore function"
   (map (fn [doc]
          (let [old-score (first doc)
                lucene-id (second doc)
@@ -96,12 +101,11 @@
     (set! (.docList dls) doc-slice)
     (.setResults rb dls)
     (let [result-context (BasicResultContext. rb)
-          response (.rsp rb)
-          ]
+          response (.rsp rb)]
       (-> response (.getValues) (.removeAll "response") )
       (.addResponse response result-context))))
 
-(defn process [rb]
+(defn process [rb name]
   "Get results, rescore and serve new results with new scoring"
   (when (rescore? rb) (let [
         params (.getParams (.req rb))
@@ -110,11 +114,13 @@
         ]
     (when (>= @rerank-num offset)
       (let [initialSearchResult (.docList (.getResults rb))
-            _x (println "inital-searchresult: " initialSearchResult)
             score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) @rerank-num))
             lucene-docs (iterator-seq (.iterator initialSearchResult))
             solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
             composed-list (map vector score lucene-docs solr-docs)
-            rescored-list (sort #(compare (first %2) (first %1)) (rescore composed-list))
+            the-rescore-function (.get @functions name)
+            rescored-list (sort #(compare (first %2) (first %1))
+                                (apply the-rescore-function [composed-list])
+                                )
             ]
         (return-new-result rb rescored-list))))))

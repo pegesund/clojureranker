@@ -36,14 +36,13 @@ public class Rescorer extends SearchComponent {
     public void prepare(ResponseBuilder responseBuilder) throws IOException {
         System.out.println("In prepare");
         prepare.invoke(responseBuilder, this.getName());
-        System.out.println("Category: " + this.getCategory().name());
 
     }
 
     @Override
     public void process(ResponseBuilder responseBuilder) throws IOException {
         System.out.println("In Process");
-        process.invoke(responseBuilder);
+        process.invoke(responseBuilder, this.getName());
     }
 
     @Override
