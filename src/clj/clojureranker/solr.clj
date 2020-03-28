@@ -31,16 +31,28 @@
   (or @rescore-default
       (= "true" (.get (.getParams (.req rb)) "rescore"))))
 
+(defonce current-init (atom nil))
+
 (defn init [args]
-  (println "in init..")
-  (let [do-start-repl (-> args (.get "defaults") (.getBooleanArg "start-nrepl"))]
+  (when args (reset! current-init (.get args "defaults")))
+  (let [default (if args (.get args "defaults") @current-init)
+        do-start-repl (.getBooleanArg default "start-nrepl")
+        name (.get default "searchComponentName")
+        a-require (.get default "require")
+        a-load-file (.get default "load-file")
+        a-function (.get default "function")
+        top (or (.get default "top") 20)
+        ]
+    (println "in init.. name: " name "top: " top "top-type: " (type top))
+    (when a-require (require (symbol a-require)))
+    (when a-load-file (load-file a-load-file))
     (when do-start-repl
       (startnrepl)
-      )
-    )
-  )
+      )))
 
-(defn prepare [rb]
+
+(defn prepare [rb name]
+  (println "-- In prepare, name: " name)
   (when (rescore? rb)
     (let [params (.getParams (.req rb))
           sortSpec (.getSortSpec rb)
@@ -49,7 +61,7 @@
     (when (> @rerank-num offset)
       (.setCount sortSpec @rerank-num)
       (.setOffset sortSpec 0)
-      (when (nil? (.get params "rescore"))
+      (when (= "true" (.get params "rescore"))
         (.setFieldFlags rb SolrIndexSearcher/GET_SCORES))))))
 
 
@@ -93,11 +105,12 @@
   "Get results, rescore and serve new results with new scoring"
   (when (rescore? rb) (let [
         params (.getParams (.req rb))
-        offset (or (Integer. (.get params "start")) 0)
+        offset (Integer. (or (.get params "start") 0))
         searcher (.getSearcher (.req rb))
         ]
     (when (>= @rerank-num offset)
       (let [initialSearchResult (.docList (.getResults rb))
+            _x (println "inital-searchresult: " initialSearchResult)
             score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) @rerank-num))
             lucene-docs (iterator-seq (.iterator initialSearchResult))
             solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
