@@ -7,13 +7,17 @@
 
 
 (def started (atom false))
+(def repl-lock (Object.))
 
-(defn startnrepl []
-  (when (not @started)
+(defn startnrepl
+  "start a repl at port 7888 and make sure that only one repl is started"
+  []
+  (locking repl-lock (when (not @started)
+    (reset! started true)
     (repl/start-server :port 7888)
     (reset! started true)
-    (println "Repl started at port 78888")
-    )
+    (println "Repl started at port 78888. Enjoy!")
+    ))
   )
 
 (defn hupp []
@@ -22,14 +26,19 @@
 (def rerank-num (atom 1000))
 (def rescore-default (atom false))
 
+
 (defn rescore? [rb]
   (or @rescore-default
       (= "true" (.get (.getParams (.req rb)) "rescore"))))
 
 (defn init [args]
-  (startnrepl)
   (println "in init..")
-  (println args))
+  (let [do-start-repl (-> args (.get "defaults") (.getBooleanArg "start-nrepl"))]
+    (when do-start-repl
+      (startnrepl)
+      )
+    )
+  )
 
 (defn prepare [rb]
   (when (rescore? rb)

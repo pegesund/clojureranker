@@ -27,7 +27,7 @@ public class Rescorer extends SearchComponent {
         process = Clojure.var("clojureranker.solr", "process");
         IFn init = Clojure.var("clojureranker.solr", "init");
         init.invoke(args);
-
+        System.out.println(this.getName() + " - " + this.getDescription() + this.getMetricNames() + super.getName());
 
     }
 
@@ -35,6 +35,7 @@ public class Rescorer extends SearchComponent {
     public void prepare(ResponseBuilder responseBuilder) throws IOException {
         System.out.println("In prepare");
         prepare.invoke(responseBuilder);
+
     }
 
     @Override
