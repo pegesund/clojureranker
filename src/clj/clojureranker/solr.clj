@@ -20,10 +20,6 @@
     ))
   )
 
-(defn hupp []
-  (println "---- HUPP 34"))
-
-
 (def rescore-default (atom false))
 (defonce functions (atom {}))
 (defonce tops (atom {}))
@@ -59,7 +55,6 @@
 
 
 (defn prepare [rb name]
-  (println "-- In prepare, name: " name)
   (when (rescore? rb)
     (let [params (.getParams (.req rb))
           sortSpec (.getSortSpec rb)
