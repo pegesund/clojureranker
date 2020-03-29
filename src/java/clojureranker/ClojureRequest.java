@@ -20,7 +20,6 @@ public class ClojureRequest extends RequestHandlerBase {
 
     @Override
     public void handleRequestBody(SolrQueryRequest solrQueryRequest, SolrQueryResponse solrQueryResponse) throws Exception {
-
     }
 
     @Override

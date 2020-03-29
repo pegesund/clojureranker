@@ -23,6 +23,7 @@
 (def rescore-default (atom false))
 (defonce functions (atom {}))
 (defonce tops (atom {}))
+(defonce ids (atom {}))
 
 
 (defn rescore? [rb]
@@ -39,9 +40,9 @@
         a-require (.get default "require")
         a-load-file (.get default "load-file")
         a-function (.get default "function")
-        top (or (.get default "top") 20)
+        top (or (.get default "top") 50)
+        id-field (or (.get default "id") "id")
         ]
-    (println "in init.. name: " name "top: " top "top-type: " (type top))
     (when a-require (require (symbol a-require)))
     (when a-load-file (load-file a-load-file))
     (when do-start-repl
@@ -51,6 +52,7 @@
       (let [fun (resolve (symbol a-function))]
         (swap! functions assoc name fun)))
     (swap! tops assoc name top)
+    (swap! ids assoc name id-field)
     ))
 
 
@@ -79,7 +81,6 @@
            [new-score lucene-id])
          ) score_list)
   )
-
 
 
 (defn return-new-result
@@ -117,7 +118,8 @@
       (let [initialSearchResult (.docList (.getResults rb))
             score (seq (ClojureUtils/iterableToList (.iterator initialSearchResult) top))
             lucene-docs (iterator-seq (.iterator initialSearchResult))
-            solr-docs (map #(.doc searcher % #{"id"}) lucene-docs)
+            id-field-set #{(.get @ids name)}
+            solr-docs (map #(.doc searcher % id-field-set) lucene-docs)
             composed-list (map vector score lucene-docs solr-docs)
             the-rescore-function (.get @functions name)
             rescored-list (sort #(compare (first %2) (first %1))
