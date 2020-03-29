@@ -133,7 +133,19 @@ My company, [Sannsyn](https://sannsyn.com), is working on a plugin called Tellus
 We also adopt the plugin for larger customer if needed.
 
 Parts of this will be open sources, stay tuned or if you are interested, just drop us a line to get some early info 
-    
+
+## Embedding and boostrapping the clojure interpreter
+
+This line did cost me my last non-grey hair straw, but it made me available to embed and boostrap the clojure interpreter from Solr:
+
+
+```clojure
+    Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+```
+
+I mention here specifically as I might save some work for some other.
+
+Drop me a line if you have an alternative approach.
 
 ## Solr versions
 
@@ -150,6 +162,7 @@ The new jar to add to Solr will be in the target-dir
 This plugin is loosely based on info in [this article](https://tech.finn.no/2018/04/10/personalized-search/)
 
 Thanks for for open sourcing! 
+
 
 ## License
 
