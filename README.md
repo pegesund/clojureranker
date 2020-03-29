@@ -107,7 +107,7 @@ But if you do heavy stuff, like getting info through http-requests and/or heavy 
 
 ## Contributions and feedback
 
-is off course welcome. Just drop create a pull request and drop be a line.
+is off course welcome. Just drop create a pull request and drop me a note.
 
 ## TellusR
 
