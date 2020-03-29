@@ -26,7 +26,7 @@ It should be pretty fast to start going
 
 If you think creating a leningen project is overkill, you can also do use the "load-file" parameter which should point to an absolute file path.
 
-The plugin will the a load-file on this file at startup
+The plugin will the a load-file on this file at startup.
 
 ### Solr configuration
 
@@ -101,9 +101,9 @@ The repl should off course only be run in debug environments, as it is a loaded 
 
 ## Speed
 
-It is pretty fast and I cant hardly notice the difference between a normal solr query and a rescored one
+It is pretty fast and I cant hardly notice the difference between a normal solr query and a rescored one.
 
-But if you do heavy stuff, like getting info through http-requests and or heavy vector calculations respondse time will probably go 
+But if you do heavy stuff, like getting info through http-requests and/or heavy vector calculations response time will probably rise. 
 
 ## Contributions and feedback
 
