@@ -2,7 +2,6 @@
   (:require [nrepl.server :refer [start-server stop-server]]
             [clojureranker.repl])
   (:import (org.apache.solr.search SolrIndexSearcher DocListAndSet DocSlice)
-           (com.google.common.collect Streams ImmutableList)
            (clojureranker ClojureUtils)
            (org.apache.solr.response BasicResultContext)))
 
@@ -42,8 +41,7 @@
       (let [fun (resolve (symbol a-function))]
         (swap! functions assoc name fun)))
     (swap! tops assoc name top)
-    (swap! ids assoc name id-field)
-    ))
+    (swap! ids assoc name id-field)))
 
 (defn prepare [rb name]
   (when (rescore? rb)
@@ -97,8 +95,7 @@
             composed-list (map vector score lucene-docs solr-docs)
             the-rescore-function (.get @functions name)
             rescored-list (sort #(compare (first %2) (first %1))
-                                (apply the-rescore-function [composed-list])
-                                )
+                                (apply the-rescore-function [composed-list]))
             result (if rows (take rows rescored-list) rescored-list)
             ]
         (return-new-result rb result))))))
