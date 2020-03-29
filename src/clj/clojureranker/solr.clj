@@ -1,41 +1,30 @@
 (ns clojureranker.solr
-  (:require [clojure.tools.nrepl.server :as repl])
+  (:require [nrepl.server :refer [start-server stop-server]]
+            [clojureranker.repl])
   (:import (org.apache.solr.search SolrIndexSearcher DocListAndSet DocSlice)
            (com.google.common.collect Streams ImmutableList)
            (clojureranker ClojureUtils)
            (org.apache.solr.response BasicResultContext)))
 
 
-(def started (atom false))
-(def repl-lock (Object.))
-
-(defn startnrepl
-  "start a repl at port 7888 and make sure that only one repl is started"
-  []
-  (locking repl-lock (when (not @started)
-    (reset! started true)
-    (repl/start-server :port 7888)
-    (reset! started true)
-    (println "Repl started at port 78888. Enjoy!")
-    ))
-  )
-
 (def rescore-default (atom false))
 (defonce functions (atom {}))
 (defonce tops (atom {}))
 (defonce ids (atom {}))
+(defonce current-init (atom nil))
 
 
 (defn rescore? [rb]
   (or @rescore-default
       (= "true" (.get (.getParams (.req rb)) "rescore"))))
 
-(defonce current-init (atom nil))
-
-(defn init [args]
+(defn init
+  "Set init values"
+  [args]
   (when args (reset! current-init (.get args "defaults")))
   (let [default (if args (.get args "defaults") @current-init)
         do-start-repl (.getBooleanArg default "start-nrepl")
+        do-rescore-default (.getBooleanArg default "rescore")
         name (.get default "searchComponentName")
         a-require (.get default "require")
         a-load-file (.get default "load-file")
@@ -43,10 +32,11 @@
         top (or (.get default "top") 50)
         id-field (or (.get default "id") "id")
         ]
+    (when do-rescore-default (reset! rescore-default true))
     (when a-require (require (symbol a-require)))
     (when a-load-file (load-file a-load-file))
     (when do-start-repl
-      (startnrepl)
+      (clojureranker.repl/startnrepl)
       )
     (when a-function
       (let [fun (resolve (symbol a-function))]
@@ -54,7 +44,6 @@
     (swap! tops assoc name top)
     (swap! ids assoc name id-field)
     ))
-
 
 (defn prepare [rb name]
   (when (rescore? rb)
@@ -69,24 +58,9 @@
       (when (= "true" (.get params "rescore"))
         (.setFieldFlags rb SolrIndexSearcher/GET_SCORES))))))
 
-
-(defn rescore [score_list]
-  "this is only a test rescore function"
-  (map (fn [doc]
-         (let [old-score (first doc)
-               lucene-id (second doc)
-               solr-doc (nth doc 2)
-               new-score (if (= (.get solr-doc "id") "055357342X") 1 (rand))
-               ]
-           [new-score lucene-id])
-         ) score_list)
-  )
-
-
 (defn return-new-result
   "Pass scored must be a list of [[lucene-id score] [lucene-id score]... ]"
   [rb scored-results]
-
     (let [unzipped-score (apply map vector scored-results)
         scores (into-array Float/TYPE (first unzipped-score))
         lucene-docs (into-array Integer/TYPE (second unzipped-score))

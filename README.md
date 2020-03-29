@@ -1,14 +1,17 @@
 # clj.clojureranker
 
-A Clojure library designed to ... well, that part is up to you.
+- Rescore Solr scoring functions with clojure functions
+- Use the hole Clojre ecosystem while rescoring
+- Build Solr plugins without packing jars and continuesly restarting Solr 
+
 
 ## Usage
 
-FIXME
+
 
 ## License
 
-Copyright © 2020 FIXME
+Copyright © 2020 Petter Egesund
 
 This program and the accompanying materials are made available under the
 terms of the Eclipse Public License 2.0 which is available at
