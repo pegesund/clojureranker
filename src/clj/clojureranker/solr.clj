@@ -43,6 +43,8 @@
     (swap! tops assoc name top)
     (swap! ids assoc name id-field)))
 
+; redirect print to repl (alter-var-root #'*out* (constantly *out*))
+
 (defn prepare [rb name]
   (when (rescore? rb)
     (let [params (.getParams (.req rb))
