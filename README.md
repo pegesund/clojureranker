@@ -2,7 +2,7 @@
 
 - Rescore Solr scoring functions with clojure functions
 - Connect to nRepl for fast development cycle
-- Use the hole Clojre ecosystem while rescoring
+- Use the whole Clojure ecosystem while rescoring
 - Build Solr plugins without repacking jars and restarting Solr all the time 
 
 
@@ -19,12 +19,12 @@ It should be pretty fast to start going
     - If you put the jar in solr/lib add startup="lazy" to you requesthandler
     - I normally put the jar in the core-dir/lib (you will have to create this dir)
 - If one use the solr-config below you will be up and running default rescorer, which rescores random 
-- Create your own leningen project and add to solr classpath, this should contain the new rescore function or just keep working on this leiningen project
+- Create your own leiningen project and add to solr classpath, this should contain the new rescore function or just keep working on this leiningen project
 - Update the solr config with require and config to reach the new rescore function   
 
 ### Even simpler distribution
 
-If you think creating a leningen project is overkill, you can also do use the "load-file" parameter which should point to an absolute file path.
+If you think creating a leiningen project is overkill, you can also do use the "load-file" parameter which should point to an absolute file path.
 
 The plugin will the a load-file on this file at startup.
 
@@ -87,7 +87,7 @@ The return of the function must be a list of type
  [[new-score lucene-id] [new-score lucene-id] [new-score lucene-id] ...]
 ```
 To note:
-- Sorting will be handles by the framework, you just provide the new score
+- Sorting will be handled by the framework, you just provide the new score
 - All solr fields are available with the get-function above
 - In the example above I just random score all hits, except if the id is 055357342X. Then I score this to 1, so this should always be on the top.
 
@@ -107,7 +107,7 @@ But if you do heavy stuff, like getting info through http-requests and/or heavy 
 
 ## Contributions and feedback
 
-is off course welcome. Just drop create a pull request and drop me a note.
+is of course welcome. Just drop create a pull request and drop me a note.
 
 ## TellusR
 
@@ -120,7 +120,7 @@ My company, [Sannsyn](https://sannsyn.com), is working on a plugin called Tellus
     - Most used terms
     - Trending stuff
     - Which stuff converts best to click/buys
-    - Find which articles which never is shown in hit lists
+    - Find which articles are never shown in hit lists
     - Find articles which are shown, but does not convert
     - Number of zero-hits, how these trends and which terms these are
     - Avg hits pr day, distribution through time and so on
@@ -132,7 +132,7 @@ My company, [Sannsyn](https://sannsyn.com), is working on a plugin called Tellus
 
 We also adopt the plugin for larger customer if needed.
 
-Parts of this will be open sources, stay tuned or if you are interested, just drop us a line to get some early info 
+Parts of this will be open source, stay tuned or if you are interested, just drop us a line to get some early info 
 
 ## Embedding and boostrapping the clojure interpreter
 
@@ -143,7 +143,7 @@ This line did cost me my last non-grey hair straw, but it made me available to e
     Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 ```
 
-I mention here specifically as I might save some work for some other.
+I mention here specifically as I might save some work for someone else.
 
 Drop me a line if you have an alternative approach.
 
